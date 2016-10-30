@@ -8,7 +8,7 @@
 package acid
 
 import (
-	"github.com/gocircuit/circuit/use/circuit"
+	"github.com/lthibault/circuit/use/circuit"
 	"fmt"
 	"reflect"
 )

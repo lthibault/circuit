@@ -13,8 +13,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/gocircuit/circuit/use/circuit"
-	"github.com/gocircuit/circuit/use/errors"
+	"github.com/lthibault/circuit/use/circuit"
+	"github.com/lthibault/circuit/use/errors"
 )
 
 func init() {

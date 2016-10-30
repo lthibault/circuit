@@ -12,15 +12,20 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/url"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
-	"github.com/gocircuit/circuit/element/docker"
-	"github.com/gocircuit/circuit/kit/assemble"
-	"github.com/gocircuit/circuit/tissue"
-	"github.com/gocircuit/circuit/tissue/locus"
-	"github.com/gocircuit/circuit/use/circuit"
-	"github.com/gocircuit/circuit/use/n"
+	"github.com/go-mangos/mangos/transport/ws"
+	"github.com/lthibault/circuit/element/docker"
+	"github.com/lthibault/circuit/kit/assemble"
+	"github.com/lthibault/circuit/nnmsg"
+	"github.com/lthibault/circuit/tissue"
+	"github.com/lthibault/circuit/tissue/locus"
+	"github.com/lthibault/circuit/use/circuit"
+	"github.com/lthibault/circuit/use/n"
 	"github.com/pkg/errors"
 
 	"github.com/urfave/cli"
@@ -82,8 +87,11 @@ func server(c *cli.Context) (err error) {
 	return nil
 }
 
-func parseDiscover(c *cli.Context) *net.UDPAddr {
+func parseDiscover(c *cli.Context) (multicast net.Addr) {
+	// Get raw multicast URL string
+	var err error
 	var src string
+
 	switch {
 	case c.String("discover") != "":
 		src = c.String("discover")
@@ -92,10 +100,46 @@ func parseDiscover(c *cli.Context) *net.UDPAddr {
 	default:
 		return nil
 	}
-	multicast, err := net.ResolveUDPAddr("udp", src)
-	if err != nil {
-		log.Fatalf("udp multicast address for discovery and assembly does not parse (%s)", err)
+
+	// Split string and decode URLs
+	rawAddrs := strings.Split(src, ",")
+	urls := make([]*url.URL, len(rawAddrs))
+	var u *url.URL
+	for i, ra := range rawAddrs {
+		u, err = url.Parse(ra)
+		if err != nil {
+			log.Fatalf("url for discovery and assembly does not parse (%s)", err)
+		}
+		urls[i] = u
 	}
+
+	// Resolve addresses
+	switch {
+	case len(urls) == 1:
+		switch urls[0].Scheme {
+		case "udp":
+			multicast, err = net.ResolveUDPAddr(urls[0].Scheme, u.Host)
+			if err != nil {
+				log.Fatalf("udp multicast address does not parse (%s)", err)
+			}
+		case "ws":
+			multicast = nnmsg.StarAddr{URL: urls, Trans: ws.NewTransport()}
+		default:
+			log.Fatalf("unknown scheme %s", urls[0].Scheme)
+		}
+	case len(urls) > 1:
+		for _, addr := range urls {
+			if addr.Scheme != "ws" {
+				log.Fatal("mixed udp/nnmsg schemes in multi-host beacon")
+			}
+			addr.Path = filepath.Clean(addr.Path)
+		}
+
+		multicast = nnmsg.StarAddr{URL: urls, Trans: ws.NewTransport()}
+	default:
+		log.Fatalf("invalid multicast address set (%v)", urls)
+	}
+
 	return multicast
 }
 

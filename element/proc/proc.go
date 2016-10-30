@@ -17,8 +17,8 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/gocircuit/circuit/kit/interruptible"
-	"github.com/gocircuit/circuit/use/circuit"
+	"github.com/lthibault/circuit/kit/interruptible"
+	"github.com/lthibault/circuit/use/circuit"
 )
 
 type Proc interface {

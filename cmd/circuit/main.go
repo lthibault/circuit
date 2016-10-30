@@ -32,7 +32,7 @@ func main() {
 				cli.StringFlag{Name: "var", Value: "", Usage: "Lock and log directory for the circuit server."},
 				cli.StringFlag{Name: "join, j", Value: "", Usage: "Join a circuit through a current member by address."},
 				cli.StringFlag{Name: "hmac", Value: "", Usage: "File with HMAC credentials for HMAC/RC4 transport security."},
-				cli.StringFlag{Name: "discover", Value: "228.8.8.8:8822", Usage: "Multicast address for peer server discovery"},
+				cli.StringFlag{Name: "discover", Value: "udp://228.8.8.8:8822", Usage: "Multicast address for peer server discovery"},
 				cli.BoolFlag{Name: "docker", Usage: "Enable docker elements; docker command must be executable"},
 			},
 		},

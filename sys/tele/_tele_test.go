@@ -14,7 +14,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gocircuit/circuit/use/n"
+	"github.com/lthibault/circuit/use/n"
 )
 
 type testMsg struct{}

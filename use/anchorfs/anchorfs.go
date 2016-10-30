@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gocircuit/circuit/use/errors"
-	"github.com/gocircuit/circuit/use/n"
+	"github.com/lthibault/circuit/use/errors"
+	"github.com/lthibault/circuit/use/n"
 )
 
 var (

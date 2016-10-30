@@ -10,10 +10,10 @@ package shell
 import (
 	"io"
 
-	xyexec "github.com/gocircuit/circuit/kit/x/exec"
-	xyio "github.com/gocircuit/circuit/kit/x/io"
-	"github.com/gocircuit/circuit/use/circuit"
-	"github.com/gocircuit/circuit/use/errors"
+	xyexec "github.com/lthibault/circuit/kit/x/exec"
+	xyio "github.com/lthibault/circuit/kit/x/io"
+	"github.com/lthibault/circuit/use/circuit"
+	"github.com/lthibault/circuit/use/errors"
 )
 
 // XXX: Run commands in their own process groups?

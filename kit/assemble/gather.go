@@ -14,32 +14,41 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/gocircuit/circuit/kit/xor"
+	"github.com/lthibault/circuit/kit/xor"
+	"github.com/lthibault/circuit/nnmsg"
 )
 
+// Gather {}
 type Gather struct {
-	addr *net.UDPAddr // udp multicast address for discovery
+	addr net.Addr // udp multicast address for discovery
 	conn *net.UDPConn
 }
 
-func NewGather(addr *net.UDPAddr) *Gather {
-	g := &Gather{
-		addr: addr,
+// NewGather ()
+func NewGather(addr net.Addr) (g *Gather) {
+	switch addr.(type) {
+	case *net.UDPAddr:
+		g = &Gather{
+			addr: addr,
+		}
+		var err error
+		if g.conn, err = net.ListenMulticastUDP("udp", nil, addr.(*net.UDPAddr)); err != nil {
+			log.Printf("problem listening to udp multicast: %v", err)
+			os.Exit(1)
+		}
+		runtime.SetFinalizer(g,
+			func(g2 *Gather) {
+				g2.conn.Close()
+			},
+		)
+	case *nnmsg.StarAddr:
+		log.Fatal("NOT IMPLEMENTED")
 	}
-	var err error
-	if g.conn, err = net.ListenMulticastUDP("udp", nil, addr); err != nil {
-		log.Printf("problem listening to udp multicast: %v", err)
-		os.Exit(1)
-	}
-	runtime.SetFinalizer(g, 
-		func(g2 *Gather) {
-			g2.conn.Close()
-		},
-	)
-	return g
+	return
 }
 
-func (s *Gather) Gather()  (xor.Key, []byte) {
+// Gather ()
+func (s *Gather) Gather() (xor.Key, []byte) {
 	buf := make([]byte, 7e3)
 	for {
 		n, _, err := s.conn.ReadFromUDP(buf)
@@ -54,15 +63,17 @@ func (s *Gather) Gather()  (xor.Key, []byte) {
 	}
 }
 
+// GatherLens {}
 type GatherLens struct {
 	gather *Gather
-	lens *Lens
+	lens   *Lens
 }
 
-func NewGatherLens(addr *net.UDPAddr, focus xor.Key, k int) *GatherLens {
+// NewGatherLens ()
+func NewGatherLens(addr net.Addr, focus xor.Key, k int) *GatherLens {
 	return &GatherLens{
 		gather: NewGather(addr),
-		lens: NewLens(focus, k),
+		lens:   NewLens(focus, k),
 	}
 }
 
@@ -70,7 +81,8 @@ func (s *GatherLens) String() string {
 	return s.lens.String()
 }
 
-func (s *GatherLens) Gather()  []byte {
+// Gather ()
+func (s *GatherLens) Gather() []byte {
 	for {
 		key, payload := s.gather.Gather()
 		if s.lens.Remember(key) {
@@ -79,6 +91,7 @@ func (s *GatherLens) Gather()  []byte {
 	}
 }
 
+// Clear ()
 func (s *GatherLens) Clear() {
 	s.lens.Clear()
 }

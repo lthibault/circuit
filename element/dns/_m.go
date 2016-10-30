@@ -6,7 +6,7 @@ import (
 	"net"
 	// "time"
 
-	. "github.com/gocircuit/circuit/github.com/miekg/dns"
+	. "github.com/lthibault/circuit/github.com/miekg/dns"
 )
 
 func Filter(w ResponseWriter, req *Msg) {

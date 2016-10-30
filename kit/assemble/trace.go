@@ -11,11 +11,13 @@ import (
 	"encoding/json"
 )
 
+// TraceMsg {}
 type TraceMsg struct {
 	Origin string // "server" or "client"
-	Addr string // address of origin
+	Addr   string // address of origin
 }
 
+// Encode ()
 func (m *TraceMsg) Encode() []byte {
 	buf, err := json.Marshal(m)
 	if err != nil {
@@ -24,6 +26,7 @@ func (m *TraceMsg) Encode() []byte {
 	return buf
 }
 
+// Decode ()
 func Decode(p []byte) (*TraceMsg, error) {
 	m := &TraceMsg{}
 	if err := json.Unmarshal(p, m); err != nil {

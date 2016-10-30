@@ -11,7 +11,7 @@ import (
 	"io"
 	"time"
 
-	srv "github.com/gocircuit/circuit/element/server"
+	srv "github.com/lthibault/circuit/element/server"
 )
 
 // ServerStat encloses subscription state information.

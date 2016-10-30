@@ -14,9 +14,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/gocircuit/circuit/kit/tele/blend"
-	"github.com/gocircuit/circuit/use/errors"
-	"github.com/gocircuit/circuit/use/n"
+	"github.com/lthibault/circuit/kit/tele/blend"
+	"github.com/lthibault/circuit/use/errors"
+	"github.com/lthibault/circuit/use/n"
 )
 
 // Listener

@@ -11,8 +11,8 @@ import (
 	"net"
 	"sync"
 
-	"github.com/gocircuit/circuit/github.com/miekg/dns"
-	"github.com/gocircuit/circuit/use/circuit"
+	"github.com/lthibault/circuit/github.com/miekg/dns"
+	"github.com/lthibault/circuit/use/circuit"
 )
 
 type Nameserver interface {

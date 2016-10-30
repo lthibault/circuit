@@ -14,4 +14,4 @@ export PATH=$PATH:/go/golang/bin:/go/workspace/bin:/go/util
 
 mkdir -p /go/workspace/src
 
-go get github.com/gocircuit/circuit/cmd/circuit
+go get github.com/lthibault/circuit/cmd/circuit

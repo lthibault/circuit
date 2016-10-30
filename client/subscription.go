@@ -8,7 +8,7 @@
 package client
 
 import (
-	"github.com/gocircuit/circuit/kit/pubsub"
+	"github.com/lthibault/circuit/kit/pubsub"
 )
 
 // SubscriptionStat encloses subscription state information.

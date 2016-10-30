@@ -10,10 +10,10 @@ package docker
 import (
 	"io"
 	
-	xio "github.com/gocircuit/circuit/kit/x/io"
-	"github.com/gocircuit/circuit/use/circuit"
-	"github.com/gocircuit/circuit/use/errors"
-	ds "github.com/gocircuit/circuit/client/docker"
+	xio "github.com/lthibault/circuit/kit/x/io"
+	"github.com/lthibault/circuit/use/circuit"
+	"github.com/lthibault/circuit/use/errors"
+	ds "github.com/lthibault/circuit/client/docker"
 )
 
 func init() {

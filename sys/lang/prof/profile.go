@@ -9,7 +9,7 @@
 package prof
 
 import (
-	"github.com/gocircuit/circuit/kit/stat"
+	"github.com/lthibault/circuit/kit/stat"
 	"sync"
 	"time"
 )

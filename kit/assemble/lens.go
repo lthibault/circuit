@@ -12,24 +12,26 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/gocircuit/circuit/kit/xor"
+	"github.com/lthibault/circuit/kit/xor"
 )
 
+// Lens {}
 type Lens struct {
-	cap int // capacity of proximity buckets
+	cap   int // capacity of proximity buckets
 	focus xor.Key
 	sync.Mutex
 	mem map[int]map[xor.Key]struct{} // proximity => set of keys
 }
 
+// NewLens ()
 func NewLens(focus xor.Key, k int) *Lens {
 	if k < 1 {
 		panic(0)
 	}
 	return &Lens{
-		cap: k,
+		cap:   k,
 		focus: focus,
-		mem: make(map[int]map[xor.Key]struct{}),
+		mem:   make(map[int]map[xor.Key]struct{}),
 	}
 }
 
@@ -39,7 +41,7 @@ func (f *Lens) String() string {
 	var w bytes.Buffer
 	for i, s := range f.mem {
 		fmt.Fprintf(&w, "%d:", i)
-		for x, _ := range s {
+		for x := range s {
 			fmt.Fprintf(&w, "%d,", uint64(x))
 		}
 		w.WriteString(" ")
@@ -48,12 +50,14 @@ func (f *Lens) String() string {
 	return w.String()
 }
 
+// Clear ()
 func (f *Lens) Clear() {
 	f.Lock()
 	defer f.Unlock()
 	f.mem = make(map[int]map[xor.Key]struct{})
 }
 
+// Remember ()
 func (f *Lens) Remember(key xor.Key) bool {
 	f.Lock()
 	defer f.Unlock()

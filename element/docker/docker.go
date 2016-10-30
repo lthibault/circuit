@@ -13,11 +13,11 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/gocircuit/circuit/element/proc"
-	"github.com/gocircuit/circuit/kit/interruptible"
-	"github.com/gocircuit/circuit/kit/lang"
-	"github.com/gocircuit/circuit/use/circuit"
-	ds "github.com/gocircuit/circuit/client/docker"
+	"github.com/lthibault/circuit/element/proc"
+	"github.com/lthibault/circuit/kit/interruptible"
+	"github.com/lthibault/circuit/kit/lang"
+	"github.com/lthibault/circuit/use/circuit"
+	ds "github.com/lthibault/circuit/client/docker"
 )
 
 type Container interface {

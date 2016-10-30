@@ -8,13 +8,13 @@
 package main
 
 import (
-	"github.com/gocircuit/circuit/use/n"
+	"github.com/lthibault/circuit/use/n"
 	"github.com/pkg/errors"
 	// "bytes"
 	"io"
 	"os"
 
-	"github.com/gocircuit/circuit/client"
+	"github.com/lthibault/circuit/client"
 
 	"github.com/urfave/cli"
 )

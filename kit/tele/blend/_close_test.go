@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/gocircuit/circuit/kit/debug/ctrlc"
-	"github.com/gocircuit/circuit/kit/tele/chain"
-	"github.com/gocircuit/circuit/kit/tele/codec"
-	"github.com/gocircuit/circuit/kit/tele/faithful"
-	"github.com/gocircuit/circuit/kit/tele/tcp"
-	"github.com/gocircuit/circuit/kit/tele/trace"
+	_ "github.com/lthibault/circuit/kit/debug/ctrlc"
+	"github.com/lthibault/circuit/kit/tele/chain"
+	"github.com/lthibault/circuit/kit/tele/codec"
+	"github.com/lthibault/circuit/kit/tele/faithful"
+	"github.com/lthibault/circuit/kit/tele/tcp"
+	"github.com/lthibault/circuit/kit/tele/trace"
 )
 
 func TestClosure(t *testing.T) {

@@ -1,6 +1,6 @@
 # Circuit
 
-[![Build Status](https://drone.io/github.com/gocircuit/circuit/status.png)](https://drone.io/github.com/gocircuit/circuit/latest) [![GoDoc](https://godoc.org/github.com/gocircuit/circuit/client?status.png)](https://godoc.org/github.com/gocircuit/circuit/client)
+[![Build Status](https://drone.io/github.com/lthibault/circuit/status.png)](https://drone.io/github.com/lthibault/circuit/latest) [![GoDoc](https://godoc.org/github.com/lthibault/circuit/client?status.png)](https://godoc.org/github.com/lthibault/circuit/client)
 
 ![Engineering role separation.](https://raw.githubusercontent.com/gocircuit/circuit/master/misc/img/3.png)
 
@@ -61,7 +61,7 @@ programs in the [CSP](http://en.wikipedia.org/wiki/Communicating_sequential_proc
 which allows engineers to encode complex dynamic response behavior, spanning multiple data centers.
 
 Find comparisons to other technologies—like Zookeeper, etcd, CoreOS, raft, Consul, Puppet, Chef, and 
-so forth—in [the wiki](https://github.com/gocircuit/circuit/wiki).
+so forth—in [the wiki](https://github.com/lthibault/circuit/wiki).
 
 ## Incomparable but related works
 
@@ -99,7 +99,7 @@ Since this video was recorded, the API-via-file-system approach was abandoned
 in favor of a simpler command-line tool and a Go client library.
 
 Also take a look at the [faux animated illustration](https://docs.google.com/presentation/d/1nazPJAmYeIvJam9oiA-6euEz3Bo9flRLqsgRU7QAlr0/edit?usp=sharing)
-of the [Advanced Tutorial: Watchbot with a back channel](https://github.com/gocircuit/circuit/tree/master/tutorial/watchbot-with-chan).
+of the [Advanced Tutorial: Watchbot with a back channel](https://github.com/lthibault/circuit/tree/master/tutorial/watchbot-with-chan).
 
 The circuit is a tool for executing and synchronizing UNIX processes across entire clusters
 by means of a command-line tool and a client library.
@@ -114,7 +114,7 @@ The Circuit comprises one small binary. It can be built for Linux and Darwin.
 Given that the [Go Language](http://golang.org) compiler is [installed](http://golang.org/doc/install),
 you can build and install the circuit binary with one line:
 
-	go get github.com/gocircuit/circuit/cmd/circuit
+	go get github.com/lthibault/circuit/cmd/circuit
 
 ## Run the servers
 
@@ -205,7 +205,7 @@ their anchor.
 
 Once the circuit servers are started, you can create, observe and control
 circuit elements (i) interactively—using the circuit binary which doubles as a command-line client—as
-well as (ii) programmatically—using the circuit Go client package `github.com/gocircuit/circuit/client`.
+well as (ii) programmatically—using the circuit Go client package `github.com/lthibault/circuit/client`.
 In fact, the circuit command-line tool is simply a front-end for the Go client library.
 
 Clients (the tool or your own) _dial into_ a circuit server in order to
@@ -477,11 +477,11 @@ Take a look, for instance, at the two “watchbot” tutorials which demonstrate
 how to implement a semi-resilient self-sustained mechanism within 
 a cluster. Find the simpler one here
 
-	https://github.com/gocircuit/circuit/tree/master/tutorial/watchbot
+	https://github.com/lthibault/circuit/tree/master/tutorial/watchbot
 
 And the more elaborate one, which demonstrate use of channels, here
 
-	https://github.com/gocircuit/circuit/tree/master/tutorial/watchbot-with-chan
+	https://github.com/lthibault/circuit/tree/master/tutorial/watchbot-with-chan
 
 ## Security ##
 
@@ -522,20 +522,20 @@ Ask questions to [The Circuit User Group](https://groups.google.com/forum/#!foru
 
 The Go client for writing circuit apps is package
 
-	github.com/gocircuit/circuit/client
+	github.com/lthibault/circuit/client
 
 The public interface of this package is self-contained. Other
 packages in the circuit repo are internal.
 
 Tutorials can be found within the client package directory
 
-	github.com/gocircuit/circuit/client/tutorial
+	github.com/lthibault/circuit/client/tutorial
 
 Additionally, the circuit binary directory contains the implementation
 of the circuit tool, which is itself built using the client and is another
 comprehensive example of a circuit app. It can be found in
 
-	github.com/gocircuit/circuit/cmd/circuit
+	github.com/lthibault/circuit/cmd/circuit
 
 To stay up to date with new developments, documentation and articles, follow
 The Circuit Project on Twitter [@gocircuit](https://twitter.com/gocircuit) or

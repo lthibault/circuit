@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gocircuit/circuit/kit/pubsub"
+	"github.com/lthibault/circuit/kit/pubsub"
 )
 
 // View is a folk data structure that maintains a key-value set sorted by key

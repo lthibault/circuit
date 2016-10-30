@@ -13,7 +13,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/gocircuit/circuit/use/n"
+	"github.com/lthibault/circuit/use/n"
 )
 
 type sandbox struct {

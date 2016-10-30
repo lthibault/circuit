@@ -25,8 +25,8 @@ import (
 	//"runtime/debug"
 	"strings"
 
-	"github.com/gocircuit/circuit/kit/tele/codec"
-	"github.com/gocircuit/circuit/kit/tele/trace"
+	"github.com/lthibault/circuit/kit/tele/codec"
+	"github.com/lthibault/circuit/kit/tele/trace"
 )
 
 func NewTransport(key []byte) codec.CarrierTransport {

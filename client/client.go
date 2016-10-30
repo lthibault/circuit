@@ -17,16 +17,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gocircuit/circuit/anchor"
-	"github.com/gocircuit/circuit/client/docker"
-	"github.com/gocircuit/circuit/kit/assemble"
-	_ "github.com/gocircuit/circuit/kit/debug/kill"
-	"github.com/gocircuit/circuit/sys/lang"
-	_ "github.com/gocircuit/circuit/sys/tele"
-	"github.com/gocircuit/circuit/tissue"
-	"github.com/gocircuit/circuit/tissue/locus"
-	"github.com/gocircuit/circuit/use/circuit"
-	"github.com/gocircuit/circuit/use/n"
+	"github.com/lthibault/circuit/anchor"
+	"github.com/lthibault/circuit/client/docker"
+	"github.com/lthibault/circuit/kit/assemble"
+	_ "github.com/lthibault/circuit/kit/debug/kill"
+	"github.com/lthibault/circuit/sys/lang"
+	_ "github.com/lthibault/circuit/sys/tele"
+	"github.com/lthibault/circuit/tissue"
+	"github.com/lthibault/circuit/tissue/locus"
+	"github.com/lthibault/circuit/use/circuit"
+	"github.com/lthibault/circuit/use/n"
 )
 
 var _once sync.Once

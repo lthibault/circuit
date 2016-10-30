@@ -13,7 +13,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/gocircuit/circuit/use/circuit"
+	"github.com/lthibault/circuit/use/circuit"
 )
 
 type Resource map[string]int // resource name => number of units

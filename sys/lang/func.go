@@ -15,11 +15,11 @@ import (
 	"runtime/pprof"
 	"time"
 
-	"github.com/gocircuit/circuit/sys/lang/types"
-	"github.com/gocircuit/circuit/use/circuit"
-	"github.com/gocircuit/circuit/use/errors"
-	"github.com/gocircuit/circuit/use/n"
-	"github.com/gocircuit/circuit/use/worker"
+	"github.com/lthibault/circuit/sys/lang/types"
+	"github.com/lthibault/circuit/use/circuit"
+	"github.com/lthibault/circuit/use/errors"
+	"github.com/lthibault/circuit/use/n"
+	"github.com/lthibault/circuit/use/worker"
 )
 
 func (r *Runtime) Kill(addr n.Addr) error {

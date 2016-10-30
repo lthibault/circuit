@@ -8,8 +8,8 @@
 package circuit
 
 import (
-	"github.com/gocircuit/circuit/use/n"
-	"github.com/gocircuit/circuit/use/worker"
+	"github.com/lthibault/circuit/use/n"
+	"github.com/lthibault/circuit/use/worker"
 )
 
 type runtime interface {

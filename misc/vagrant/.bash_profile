@@ -90,10 +90,10 @@ export GOROOT=$HOME/go
 export PATH=$PATH:$HOME/0/bin:$GOROOT/bin
 
 # CIRCUIT
-declare -x CIRCUIT=/Users/petar/0/src/github.com/gocircuit/circuit/cmd/circuit/.circuit
-declare -x CIRCUIT_HMAC=/Users/petar/0/src/github.com/gocircuit/circuit/cmd/circuit/.hmac
+declare -x CIRCUIT=/Users/petar/0/src/github.com/lthibault/circuit/cmd/circuit/.circuit
+declare -x CIRCUIT_HMAC=/Users/petar/0/src/github.com/lthibault/circuit/cmd/circuit/.hmac
 
-export VAGRANT_CWD=$GOPATH/src/github.com/gocircuit/circuit/misc/vagrant
+export VAGRANT_CWD=$GOPATH/src/github.com/lthibault/circuit/misc/vagrant
 # export VAGRANT_GO_ORIGIN=$HOME/vagrant/go
 # export VAGRANT_GOCIRCUIT_ORIGIN=$HOME/vagrant/gocircuit
 

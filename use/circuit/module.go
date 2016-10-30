@@ -9,10 +9,10 @@
 package circuit
 
 import (
-	"github.com/gocircuit/circuit/kit/module"
-	"github.com/gocircuit/circuit/sys/lang/types"
-	"github.com/gocircuit/circuit/use/n"
-	"github.com/gocircuit/circuit/use/worker"
+	"github.com/lthibault/circuit/kit/module"
+	"github.com/lthibault/circuit/sys/lang/types"
+	"github.com/lthibault/circuit/use/n"
+	"github.com/lthibault/circuit/use/worker"
 )
 
 var mod = module.Slot{Name: "language"}
@@ -87,6 +87,7 @@ func RunInBack(fn func()) {
 	get().RunInBack(fn)
 }
 
+// HangInBack ()
 func HangInBack() {
 	RunInBack(Hang)
 }

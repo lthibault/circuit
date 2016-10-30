@@ -11,18 +11,20 @@ import (
 	"log"
 	"net"
 
-	"github.com/gocircuit/circuit/kit/xor"
-	"github.com/gocircuit/circuit/use/circuit"
-	"github.com/gocircuit/circuit/use/n"
+	"github.com/lthibault/circuit/kit/xor"
+	"github.com/lthibault/circuit/use/circuit"
+	"github.com/lthibault/circuit/use/n"
 )
 
+// Assembler struct
 type Assembler struct {
 	focus     xor.Key
-	addr      n.Addr       // our circuit address
-	multicast *net.UDPAddr // udp multicast address
+	addr      n.Addr   // our circuit address
+	multicast net.Addr // discovery
 }
 
-func NewAssembler(addr n.Addr, multicast *net.UDPAddr) *Assembler {
+// NewAssembler ()
+func NewAssembler(addr n.Addr, multicast net.Addr) *Assembler {
 	return &Assembler{
 		focus:     xor.ChooseKey(),
 		addr:      addr,
@@ -39,8 +41,10 @@ func (a *Assembler) scatter(origin string) {
 	scatter.Scatter() // send off a sequence of messages announcing our presnence over time
 }
 
+// JoinFunc ()
 type JoinFunc func(n.Addr)
 
+// AssembleServer ()
 func (a *Assembler) AssembleServer(joinServer JoinFunc) {
 	go a.scatter("server")
 	go func() {
@@ -76,6 +80,7 @@ func joinClient(serverAddr, clientAddr n.Addr) {
 	y.OfferAddr(serverAddr)
 }
 
+// AssembleClient ()
 func (a *Assembler) AssembleClient() n.Addr { // XXX: Clients should get more than one offering.
 	d, xd := NewDialBack()
 	circuit.Listen("dialback", xd)

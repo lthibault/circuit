@@ -8,8 +8,8 @@
 package tele
 
 import (
-	"github.com/gocircuit/circuit/kit/tele/blend"
-	"github.com/gocircuit/circuit/use/n"
+	"github.com/lthibault/circuit/kit/tele/blend"
+	"github.com/lthibault/circuit/use/n"
 )
 
 type Conn struct {

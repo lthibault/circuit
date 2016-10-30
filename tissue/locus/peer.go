@@ -10,9 +10,9 @@ package locus
 import (
 	"encoding/gob"
 
-	"github.com/gocircuit/circuit/kit/lang"
-	"github.com/gocircuit/circuit/tissue"
-	"github.com/gocircuit/circuit/use/circuit"
+	"github.com/lthibault/circuit/kit/lang"
+	"github.com/lthibault/circuit/tissue"
+	"github.com/lthibault/circuit/use/circuit"
 )
 
 // Peer encloses a cross-interface to the tissue system of a circuit worker, as well as

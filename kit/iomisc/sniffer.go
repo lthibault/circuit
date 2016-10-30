@@ -15,7 +15,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/gocircuit/circuit/use/errors"
+	"github.com/lthibault/circuit/use/errors"
 )
 
 // ??

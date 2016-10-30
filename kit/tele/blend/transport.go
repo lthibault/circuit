@@ -10,8 +10,8 @@ package blend
 import (
 	"net"
 
-	"github.com/gocircuit/circuit/kit/tele/codec"
-	"github.com/gocircuit/circuit/kit/tele/trace"
+	"github.com/lthibault/circuit/kit/tele/codec"
+	"github.com/lthibault/circuit/kit/tele/trace"
 )
 
 type Transport struct {
