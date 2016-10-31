@@ -5,13 +5,11 @@
 // Authors:
 //   2013 Petar Maymounkov <p@gocircuit.org>
 
-/*
-	Package client provides access to the circuit programming environment to user programs.
-*/
+// Package client provides access to the circuit programming environment to user
+// programs.
 package client
 
 import (
-	"errors"
 	"math/rand"
 	"net"
 	"sync"
@@ -20,13 +18,15 @@ import (
 	"github.com/lthibault/circuit/anchor"
 	"github.com/lthibault/circuit/client/docker"
 	"github.com/lthibault/circuit/kit/assemble"
-	_ "github.com/lthibault/circuit/kit/debug/kill"
+	_ "github.com/lthibault/circuit/kit/debug/kill" //
 	"github.com/lthibault/circuit/sys/lang"
-	_ "github.com/lthibault/circuit/sys/tele"
+	_ "github.com/lthibault/circuit/sys/tele" //
 	"github.com/lthibault/circuit/tissue"
 	"github.com/lthibault/circuit/tissue/locus"
 	"github.com/lthibault/circuit/use/circuit"
 	"github.com/lthibault/circuit/use/n"
+
+	"github.com/pkg/errors"
 )
 
 var _once sync.Once
@@ -62,25 +62,29 @@ func Dial(addr string, authkey []byte) *Client {
 	if err != nil {
 		panic("circuit address does not parse")
 	}
-	c.y = locus.YLocus{circuit.Dial(w, "locus")}
+	c.y = locus.YLocus{X: circuit.Dial(w, "locus")}
 	return c
 }
 
+// DialDiscover dials into an existing circuit, using the discovery system to
+// locate peers.
 func DialDiscover(multicast string, authkey []byte) *Client {
-	mcast, err := net.ResolveUDPAddr("udp", multicast)
-	if err != nil {
-		panic(err)
+	var t *assemble.Transponder
+	var err error
+	if t, err = assemble.TransponderFromAddrString(multicast); err != nil {
+		panic(errors.Wrapf(err, "error building transponder (%v)", err))
 	}
+
 	_once.Do(func() {
 		_init(authkey)
 	})
 	c := &Client{}
-	dialback := assemble.NewAssembler(circuit.ServerAddr(), mcast).AssembleClient()
-	c.y = locus.YLocus{circuit.Dial(dialback, "locus")}
+	dialback := assemble.NewAssembler(circuit.ServerAddr(), t).AssembleClient()
+	c.y = locus.YLocus{X: circuit.Dial(dialback, "locus")}
 	return c
 }
 
-// Address returns the circuit address of the server that this client is connected to.
+// Addr returns the circuit address of the server that this client is connected to.
 func (c *Client) Addr() string {
 	return c.y.X.Addr().String()
 }
@@ -102,6 +106,7 @@ func (c *Client) Walk(walk []string) Anchor {
 	return t.Walk(walk[1:])
 }
 
+// Path ()
 func (c *Client) Path() string {
 	return "/"
 }
@@ -118,7 +123,7 @@ func (c *Client) View() map[string]Anchor {
 
 func (c *Client) newTerminal(xterm circuit.X, xkin tissue.KinAvatar) terminal {
 	return terminal{
-		y: anchor.YTerminal{xterm},
+		y: anchor.YTerminal{X: xterm},
 		k: xkin,
 	}
 }
@@ -143,7 +148,7 @@ func (c *Client) MakeDocker(run docker.Run) (docker.Container, error) {
 	return nil, errors.New("cannot create elements outside of servers")
 }
 
-// MakeNameserver…
+// MakeNameserver …
 func (c *Client) MakeNameserver(string) (Nameserver, error) {
 	return nil, errors.New("cannot create elements outside of servers")
 }

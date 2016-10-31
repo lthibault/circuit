@@ -27,7 +27,7 @@ func srvStat(s srv.Stat) ServerStat {
 	}
 }
 
-// Server…
+// Server …
 // All methods panic if the hosting circuit server dies.
 type Server interface {
 	Profile(string) (io.ReadCloser, error)

@@ -7,71 +7,17 @@
 
 package assemble
 
-import (
-	"encoding/json"
-	"log"
-	"net"
-	"os"
-	"runtime"
-
-	"github.com/lthibault/circuit/kit/xor"
-	"github.com/lthibault/circuit/nnmsg"
-)
+import "github.com/lthibault/circuit/kit/xor"
 
 // Gather {}
 type Gather struct {
-	addr net.Addr // udp multicast address for discovery
-	recv <-chan *Msg
-}
-
-// NewGather ()
-func NewGather(addr net.Addr) (g *Gather) {
-	var err error
-	chGather := make(chan *Msg)
-	g = &Gather{
-		addr: addr,
-		recv: chGather,
-	}
-
-	switch addr.(type) {
-	case *net.UDPAddr:
-		var conn *net.UDPConn
-		if conn, err = net.ListenMulticastUDP("udp", nil, addr.(*net.UDPAddr)); err != nil {
-			log.Printf("problem listening to udp multicast: %v", err)
-			os.Exit(1)
-		}
-
-		runtime.SetFinalizer(g,
-			func(g2 *Gather) {
-				conn.Close()
-				close(chGather)
-			},
-		)
-
-		go func(ch chan<- *Msg) {
-			buf := make([]byte, 7e3)
-			for {
-				n, _, err := conn.ReadFromUDP(buf)
-				if err != nil {
-					panic(err)
-				}
-				var msg Msg
-				if err = json.Unmarshal(buf[:n], &msg); err != nil {
-					continue // malformed invitation
-				}
-				ch <- &msg
-			}
-		}(chGather)
-
-	case *nnmsg.StarAddr:
-		log.Fatal("NOT IMPLEMENTED")
-	}
-	return
+	gather  <-chan []byte
+	recvMsg <-chan *Msg
 }
 
 // Gather ()
 func (s *Gather) Gather() (xor.Key, []byte) {
-	msg := <-s.recv
+	msg := <-s.recvMsg
 	return msg.Key, msg.Payload
 }
 
@@ -82,9 +28,9 @@ type GatherLens struct {
 }
 
 // NewGatherLens ()
-func NewGatherLens(addr net.Addr, focus xor.Key, k int) *GatherLens {
+func NewGatherLens(m Multicaster, focus xor.Key, k int) *GatherLens {
 	return &GatherLens{
-		gather: NewGather(addr),
+		gather: NewTransponder(m).NewGather(),
 		lens:   NewLens(focus, k),
 	}
 }

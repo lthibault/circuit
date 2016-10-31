@@ -9,7 +9,6 @@ package assemble
 
 import (
 	"log"
-	"net"
 
 	"github.com/lthibault/circuit/kit/xor"
 	"github.com/lthibault/circuit/use/circuit"
@@ -19,12 +18,12 @@ import (
 // Assembler struct
 type Assembler struct {
 	focus     xor.Key
-	addr      n.Addr   // our circuit address
-	multicast net.Addr // discovery
+	addr      n.Addr       // our circuit address
+	multicast *Transponder // discovery
 }
 
 // NewAssembler ()
-func NewAssembler(addr n.Addr, multicast net.Addr) *Assembler {
+func NewAssembler(addr n.Addr, multicast *Transponder) *Assembler {
 	return &Assembler{
 		focus:     xor.ChooseKey(),
 		addr:      addr,
@@ -37,18 +36,19 @@ func (a *Assembler) scatter(origin string) {
 		Origin: origin,
 		Addr:   a.addr.String(),
 	}
-	scatter := NewScatter(a.multicast, a.focus, msg.Encode())
-	scatter.Scatter() // send off a sequence of messages announcing our presnence over time
+
+	// send off a sequence of messages announcing our presnence over time
+	a.multicast.NewScatter(a.focus, msg.Encode()).Scatter()
 }
 
 // JoinFunc ()
 type JoinFunc func(n.Addr)
 
 // AssembleServer ()
-func (a *Assembler) AssembleServer(joinServer JoinFunc) {
+func (a Assembler) AssembleServer(joinServer JoinFunc) {
 	go a.scatter("server")
 	go func() {
-		gather := NewGather(a.multicast)
+		gather := a.multicast.NewGather()
 		for {
 			_, payload := gather.Gather()
 			trace, err := Decode(payload)
@@ -81,7 +81,7 @@ func joinClient(serverAddr, clientAddr n.Addr) {
 }
 
 // AssembleClient ()
-func (a *Assembler) AssembleClient() n.Addr { // XXX: Clients should get more than one offering.
+func (a Assembler) AssembleClient() n.Addr { // XXX: Clients should get more than one offering.
 	d, xd := NewDialBack()
 	circuit.Listen("dialback", xd)
 	go a.scatter("client")

@@ -23,8 +23,10 @@ import (
 func TestDiscovering(t *testing.T) {
 	ch := make(chan int)
 	maddr := &net.UDPAddr{IP: net.IP{228, 8, 8, 8}, Port: 8822}
-	scatter := NewScatter(maddr, xor.Key(0), []byte("d1"))
-	gather := NewGatherLens(maddr, xor.Key(1), 2)
+	multi, _ := NewUDPMulticaster(maddr)
+	trans := NewTransponder(multi)
+	scatter := trans.NewScatter(xor.Key(0), []byte("d1"))
+	gather := NewGatherLens(multi, xor.Key(1), 2)
 	go func() {
 		scatter.Scatter()
 	}()
