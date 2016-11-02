@@ -48,8 +48,13 @@ func server(c *cli.Context) (err error) {
 		}
 	}
 
+	// peer discovery
 	var transponder *assemble.Transponder
-	if transponder, err = parseDiscover(c); err != nil {
+	src := c.String("discover")
+	if src == "" {
+		return nil
+	}
+	if transponder, err = assemble.TransponderFromAddrString(src); err != nil {
 		return errors.Wrapf(err, "cannot parse discovery address (%v)", err)
 	}
 
@@ -87,22 +92,6 @@ func server(c *cli.Context) (err error) {
 
 	<-(chan struct{})(nil)
 	return nil
-}
-
-func parseDiscover(c *cli.Context) (multicast *assemble.Transponder, err error) {
-	// Get raw multicast URL string
-	var src string
-
-	switch {
-	case c.String("discover") != "":
-		src = c.String("discover")
-	case os.Getenv("CIRCUIT_DISCOVER") != "":
-		src = os.Getenv("CIRCUIT_DISCOVER")
-	default:
-		return nil, nil
-	}
-
-	return assemble.TransponderFromAddrString(src)
 }
 
 func parseAddr(c *cli.Context) (*net.TCPAddr, error) {
