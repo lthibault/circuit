@@ -72,12 +72,6 @@ type Multicaster interface {
 	Close() error
 }
 
-// // Transponder {}
-// type Transponder interface {
-// 	NewScatter(xor.Key, []byte) *Scatter
-// 	NewGather() *Gather
-// }
-
 // Transponder {}
 type Transponder struct {
 	ch chan []byte

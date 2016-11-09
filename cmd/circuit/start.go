@@ -39,7 +39,7 @@ func server(c *cli.Context) (err error) {
 	// parse arguments
 	var tcpaddr *net.TCPAddr
 	if tcpaddr, err = parseAddr(c); err != nil { // server bind address
-		return errors.Wrapf(err, "cannot parse server bind address (%s)", err)
+		return errors.Wrapf(err, "cannot parse server bind address %s (%s)", tcpaddr, err)
 	}
 	var join n.Addr // join address of another circuit server
 	if c.IsSet("join") {
