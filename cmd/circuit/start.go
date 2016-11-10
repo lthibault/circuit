@@ -66,28 +66,20 @@ func server(c *cli.Context) (err error) {
 	}
 	app.Add(trans)
 
-	// TODO
 	// runtime
-	// circ, cherr := boot.NewServer()
-	// app.Add(circ)
-	// app.ServeBackground()
-	// return <-cherr
-
-	chErr := make(chan error)
-	cfg := boot.CircuitServer{
-		ChErr:    chErr,
-		SyncFunc: trans.Bootstrap,
-
+	cherr := make(chan error)
+	app.Add(boot.ServerConfig{
 		ServiceName: tissue.ServiceName,
 		LocusName:   LocusName,
-		JoinAddr:    join,
 		ServerAddr:  load(tcpaddr, varDir, readkey(c)),
-	}
+		JoinAddr:    join,
+		T:           trans,
+	}.NewService(cherr))
 
-	app.Add(cfg)
-
+	// run application
 	app.ServeBackground()
-	return <-chErr
+	return <-cherr
+
 }
 
 func parseAddr(c *cli.Context) (*net.TCPAddr, error) {
