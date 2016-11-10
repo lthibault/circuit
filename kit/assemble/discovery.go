@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/url"
 	"runtime"
-	"strings"
 
 	"github.com/go-mangos/mangos"
 	"github.com/go-mangos/mangos/protocol/star"
@@ -25,16 +24,17 @@ type Multicaster interface {
 	Close() error
 }
 
-// Transponder {}
-type Transponder struct {
-	chDiscover chan bootdata
-	ch         chan []byte
-	m          Multicaster
-}
-
 type bootdata struct {
 	addr n.Addr
 	kin  *tissue.Kin
+}
+
+// Transponder {}
+type Transponder struct {
+	ChErr      chan error
+	chDiscover chan bootdata
+	ch         chan []byte
+	m          Multicaster
 }
 
 // NewTransponder ()
@@ -67,7 +67,11 @@ func NewTransponder(addr string) (*Transponder, error) {
 		}
 	}
 	dsc := make(chan bootdata)
-	return &Transponder{chDiscover: dsc, ch: make(chan []byte), m: m}, nil
+	return &Transponder{
+		chDiscover: dsc,
+		ch:         make(chan []byte),
+		m:          m,
+	}, nil
 }
 
 // Serve discovery
@@ -87,7 +91,9 @@ func (t *Transponder) Bootstrap(addr n.Addr, kin *tissue.Kin) {
 
 // Stop serving discovery
 func (t Transponder) Stop() {
-
+	if err := t.m.Close(); err != nil {
+		log.Println(err)
+	}
 }
 
 // Addr returns the underlying Multicaster's address
@@ -102,10 +108,6 @@ func (t Transponder) NewScatter(key xor.Key, payload []byte) *Scatter {
 			log.Printf("multicast scatter error: " + err.Error())
 		}
 	}(t.ch)
-
-	// if _, err = t.Send(buf); err != nil {
-	// 	log.Printf("multicast scatter error: " + err.Error())
-	// }
 
 	return &Scatter{
 		scatter: t.ch,
@@ -194,12 +196,12 @@ func (u udp) Close() error {
 }
 
 type nnmsg struct {
-	addr []*url.URL
+	addr *url.URL
 	sock mangos.Socket
 }
 
 // NewNNMulticaster ()
-func NewNNMulticaster(addr ...*url.URL) (Multicaster, error) {
+func NewNNMulticaster(addr *url.URL) (Multicaster, error) {
 	var sock mangos.Socket
 	var err error
 	if sock, err = star.NewSocket(); err != nil {
@@ -208,15 +210,7 @@ func NewNNMulticaster(addr ...*url.URL) (Multicaster, error) {
 
 	all.AddTransports(sock)
 
-	var nerr int
-	for _, u := range addr {
-		if err = sock.Dial(u.String()); err != nil {
-			log.Println(errors.Wrapf(err, "error dialing socket %s: %v", u, err))
-			nerr++
-		}
-	}
-
-	if nerr >= len(addr) {
+	if err = sock.Dial(addr.String()); err != nil {
 		return nil, errors.New("transponder failed to establish connection")
 	}
 
@@ -225,7 +219,7 @@ func NewNNMulticaster(addr ...*url.URL) (Multicaster, error) {
 
 // String representation of the address
 func (n nnmsg) Addr() string {
-	return strings.Join(n.Slice(), ",")
+	return n.addr.String()
 }
 
 func (n nnmsg) Send(b []byte) error {
@@ -238,13 +232,4 @@ func (n nnmsg) Recv() ([]byte, error) {
 
 func (n nnmsg) Close() error {
 	return n.sock.Close()
-}
-
-// Slice of addresses
-func (n nnmsg) Slice() []string {
-	urls := make([]string, len(n.addr))
-	for i, u := range n.addr {
-		urls[i] = u.String()
-	}
-	return urls
 }

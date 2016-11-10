@@ -26,6 +26,9 @@ import (
 	"github.com/urfave/cli"
 )
 
+// LocusName ???
+const LocusName = "locus"
+
 func server(c *cli.Context) (err error) {
 	println("CIRCUIT 2015 gocircuit.org")
 
@@ -42,6 +45,7 @@ func server(c *cli.Context) (err error) {
 	if tcpaddr, err = parseAddr(c); err != nil { // server bind address
 		return errors.Wrapf(err, "cannot parse server bind address %s (%s)", tcpaddr, err)
 	}
+
 	var join n.Addr // join address of another circuit server
 	if c.IsSet("join") {
 		if join, err = n.ParseAddr(c.String("join")); err != nil {
@@ -117,16 +121,4 @@ func parseAddr(c *cli.Context) (*net.TCPAddr, error) {
 	default:
 		return nil, errors.New("either an -addr or an -if option is required to start a server")
 	}
-}
-
-// LocusName ???
-const LocusName = "locus"
-
-func dontPanic(call func(), ifPanic string) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Fatalf("%s (%s)", ifPanic, r)
-		}
-	}()
-	call()
 }

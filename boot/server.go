@@ -28,8 +28,8 @@ type ServerConfig struct {
 // NewService initializes a service from a config file
 func (cfg ServerConfig) NewService(cherr chan<- error) suture.Service {
 	return &server{
-		ChErr:    cherr, // sub-implement
-		SyncFunc: cfg.T.Bootstrap,
+		ChErr: cherr, // sub-implement
+		T:     cfg.T,
 
 		ServiceName: cfg.ServiceName,
 		LocusName:   cfg.LocusName,
@@ -40,8 +40,8 @@ func (cfg ServerConfig) NewService(cherr chan<- error) suture.Service {
 
 // server service struct
 type server struct {
-	ChErr    chan<- error
-	SyncFunc func(n.Addr, *tissue.Kin)
+	ChErr chan<- error
+	T     *assemble.Transponder
 
 	ServerAddr n.Addr
 	JoinAddr   n.Addr
@@ -63,12 +63,8 @@ func (s server) Serve() {
 	switch {
 	case s.JoinAddr != nil:
 		kin.ReJoin(s.JoinAddr)
-	case s.SyncFunc != nil:
-		go func() {
-			// continuously announce the server's address & kin
-			// this allows the transponder to restart gracefully
-			s.SyncFunc(s.ServerAddr, kin)
-		}()
+	case s.T != nil:
+		go s.T.Bootstrap(s.ServerAddr, kin)
 	default:
 		log.Println("Singleton server.")
 	}
@@ -84,7 +80,5 @@ func (s server) Serve() {
 
 // Stop serving and shut-down the app
 func (s server) Stop() {
-	// close mangos sockets here
-	// c.err <- c.tranc.Close()
-	s.ChErr <- nil
+	close(s.ChErr)
 }
