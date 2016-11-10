@@ -12,57 +12,10 @@ import (
 	"github.com/go-mangos/mangos/protocol/star"
 	"github.com/go-mangos/mangos/transport/all"
 	"github.com/lthibault/circuit/kit/xor"
+	"github.com/lthibault/circuit/tissue"
+	"github.com/lthibault/circuit/use/n"
 	"github.com/pkg/errors"
 )
-
-// TransponderFromAddrString takes a string containing a URL or a comma-separated
-// list of URLs and returns a transponder
-func TransponderFromAddrString(addr string) (*Transponder, error) {
-	var u *url.URL
-	var err error
-
-	rawAddrs := strings.Split(addr, ",")
-	urls := make([]*url.URL, len(rawAddrs))
-
-	for i, ra := range rawAddrs {
-		u, err = url.Parse(ra)
-		if err != nil {
-			return nil, errors.Wrapf(err, "url for discovery and assembly does not parse (%s)", err)
-		}
-		urls[i] = u
-	}
-
-	var multicast Multicaster
-	if len(urls) == 1 {
-		u = urls[0]
-		if u.Scheme == "udp" {
-			// udp
-			addr, e := net.ResolveUDPAddr(u.Scheme, u.Host)
-			if e != nil {
-				return nil, errors.Wrapf(err, "udp multicast address does not parse (%s)", e)
-			}
-
-			if multicast, err = NewUDPMulticaster(addr); err != nil {
-				return nil, err
-			}
-
-		} else {
-			// nnmsg
-			if multicast, err = NewNNMulticaster(u); err != nil {
-				return nil, err
-			}
-
-		}
-	} else if len(urls) > 0 {
-		// nnmsg
-		if multicast, err = NewNNMulticaster(urls...); err != nil {
-			return nil, err
-		}
-	} else {
-		log.Fatalf("invalid discovery address %s", addr)
-	}
-	return NewTransponder(multicast), nil
-}
 
 // Multicaster {}
 type Multicaster interface {
@@ -74,13 +27,67 @@ type Multicaster interface {
 
 // Transponder {}
 type Transponder struct {
-	ch chan []byte
-	m  Multicaster
+	chDiscover chan bootdata
+	ch         chan []byte
+	m          Multicaster
+}
+
+type bootdata struct {
+	addr n.Addr
+	kin  *tissue.Kin
 }
 
 // NewTransponder ()
-func NewTransponder(m Multicaster) *Transponder {
-	return &Transponder{ch: make(chan []byte), m: m}
+func NewTransponder(addr string) (*Transponder, error) {
+	var err error
+	var u *url.URL
+
+	if u, err = url.Parse(addr); err != nil {
+		err = errors.Wrapf(
+			err, "url for discovery and assembly does not parse (%s)", err,
+		)
+		return nil, err
+	}
+
+	var m Multicaster
+	switch u.Scheme {
+	case "udp":
+		addr, e := net.ResolveUDPAddr(u.Scheme, u.Host)
+		if e != nil {
+			err = errors.Wrapf(err, "udp multicast address does not parse (%s)", e)
+			return nil, err
+		}
+
+		if m, err = NewUDPMulticaster(addr); err != nil {
+			return nil, err
+		}
+	default:
+		if m, err = NewNNMulticaster(u); err != nil {
+			return nil, err
+		}
+	}
+	dsc := make(chan bootdata)
+	return &Transponder{chDiscover: dsc, ch: make(chan []byte), m: m}, nil
+}
+
+// Serve discovery
+func (t *Transponder) Serve() {
+	d := <-t.chDiscover
+	log.Printf("Using UDP multicast discovery on address %s", t.Addr())
+	NewAssembler(
+		d.addr,
+		t,
+	).AssembleServer(func(joinAddr n.Addr) { d.kin.ReJoin(joinAddr) })
+}
+
+// Bootstrap the cluster on top of the transponder's discovery service
+func (t *Transponder) Bootstrap(addr n.Addr, kin *tissue.Kin) {
+	t.chDiscover <- bootdata{addr: addr, kin: kin}
+}
+
+// Stop serving discovery
+func (t Transponder) Stop() {
+
 }
 
 // Addr returns the underlying Multicaster's address

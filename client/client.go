@@ -71,7 +71,7 @@ func Dial(addr string, authkey []byte) *Client {
 func DialDiscover(multicast string, authkey []byte) *Client {
 	var t *assemble.Transponder
 	var err error
-	if t, err = assemble.TransponderFromAddrString(multicast); err != nil {
+	if t, err = assemble.NewTransponder(multicast); err != nil {
 		panic(errors.Wrapf(err, "error building transponder (%v)", err))
 	}
 

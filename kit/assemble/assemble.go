@@ -47,28 +47,26 @@ type JoinFunc func(n.Addr)
 // AssembleServer ()
 func (a Assembler) AssembleServer(joinServer JoinFunc) {
 	go a.scatter("server")
-	go func() {
-		gather := a.multicast.NewGather()
-		for {
-			_, payload := gather.Gather()
-			trace, err := Decode(payload)
-			if err != nil {
-				log.Printf("Unrecognized trace message (%v)", err)
-				continue
-			}
-			joinAddr, err := n.ParseAddr(trace.Addr)
-			if err != nil {
-				log.Printf("Trace origin address not parsing (%v)", err)
-				continue
-			}
-			switch trace.Origin {
-			case "server":
-				joinServer(joinAddr)
-			case "client":
-				joinClient(a.addr, joinAddr)
-			}
+	gather := a.multicast.NewGather()
+	for {
+		_, payload := gather.Gather()
+		trace, err := Decode(payload)
+		if err != nil {
+			log.Printf("Unrecognized trace message (%v)", err)
+			continue
 		}
-	}()
+		joinAddr, err := n.ParseAddr(trace.Addr)
+		if err != nil {
+			log.Printf("Trace origin address not parsing (%v)", err)
+			continue
+		}
+		switch trace.Origin {
+		case "server":
+			joinServer(joinAddr)
+		case "client":
+			joinClient(a.addr, joinAddr)
+		}
+	}
 }
 
 func joinClient(serverAddr, clientAddr n.Addr) {

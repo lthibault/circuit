@@ -28,8 +28,8 @@ func nameserverStat(s dns.Stat) NameserverStat {
 	}
 }
 
+// Nameserver iface
 type Nameserver interface {
-
 	Set(rr string) error
 
 	Unset(name string)

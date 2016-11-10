@@ -13,17 +13,15 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/signal"
 	"path"
-	"syscall"
 
+	"github.com/lthibault/circuit/boot"
 	"github.com/lthibault/circuit/element/docker"
 	"github.com/lthibault/circuit/kit/assemble"
 	"github.com/lthibault/circuit/tissue"
-	"github.com/lthibault/circuit/tissue/locus"
-	"github.com/lthibault/circuit/use/circuit"
 	"github.com/lthibault/circuit/use/n"
 	"github.com/pkg/errors"
+	"github.com/thejerf/suture"
 
 	"github.com/urfave/cli"
 )
@@ -38,6 +36,7 @@ func server(c *cli.Context) (err error) {
 		}
 		log.Printf("Enabling docker elements, using %s", cmd)
 	}
+
 	// parse arguments
 	var tcpaddr *net.TCPAddr
 	if tcpaddr, err = parseAddr(c); err != nil { // server bind address
@@ -50,16 +49,6 @@ func server(c *cli.Context) (err error) {
 		}
 	}
 
-	// peer discovery
-	var transponder *assemble.Transponder
-	src := c.String("discover")
-	if src == "" {
-		return nil
-	}
-	if transponder, err = assemble.TransponderFromAddrString(src); err != nil {
-		return errors.Wrapf(err, "cannot parse discovery address (%v)", err)
-	}
-
 	// server instance working directory
 	var varDir string
 	if !c.IsSet("var") {
@@ -68,34 +57,37 @@ func server(c *cli.Context) (err error) {
 		varDir = c.String("var")
 	}
 
-	// start circuit runtime
-	addr := load(tcpaddr, varDir, readkey(c))
+	app := suture.NewSimple("application")
 
-	// tissue + locus
-	kin, xkin, rip := tissue.NewKin()
-	xlocus := locus.NewLocus(kin, rip)
+	// peer discovery
+	var trans *assemble.Transponder
+	if trans, err = assemble.NewTransponder(c.String("discover")); err != nil {
+		return errors.Wrapf(err, "error booting transponder (%s)", err)
+	}
+	app.Add(trans)
 
-	// joining
-	switch {
-	case join != nil:
-		kin.ReJoin(join)
-	case transponder != nil:
-		log.Printf("Using UDP multicast discovery on address %s", transponder.Addr())
-		go assemble.NewAssembler(
-			addr,
-			transponder,
-		).AssembleServer(func(joinAddr n.Addr) { kin.ReJoin(joinAddr) })
-	default:
-		log.Println("Singleton server.")
+	// TODO
+	// runtime
+	// circ, cherr := boot.NewServer()
+	// app.Add(circ)
+	// app.ServeBackground()
+	// return <-cherr
+
+	chErr := make(chan error)
+	cfg := boot.CircuitServer{
+		ChErr:    chErr,
+		SyncFunc: trans.Bootstrap,
+
+		ServiceName: tissue.ServiceName,
+		LocusName:   LocusName,
+		JoinAddr:    join,
+		ServerAddr:  load(tcpaddr, varDir, readkey(c)),
 	}
 
-	circuit.Listen(tissue.ServiceName, xkin)
-	circuit.Listen(LocusName, xlocus)
+	app.Add(cfg)
 
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	<-sigs
-	return nil
+	app.ServeBackground()
+	return <-chErr
 }
 
 func parseAddr(c *cli.Context) (*net.TCPAddr, error) {
