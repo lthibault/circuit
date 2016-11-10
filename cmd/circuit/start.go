@@ -13,7 +13,9 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"path"
+	"syscall"
 
 	"github.com/lthibault/circuit/element/docker"
 	"github.com/lthibault/circuit/kit/assemble"
@@ -90,7 +92,9 @@ func server(c *cli.Context) (err error) {
 	circuit.Listen(tissue.ServiceName, xkin)
 	circuit.Listen(LocusName, xlocus)
 
-	<-(chan struct{})(nil)
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	<-sigs
 	return nil
 }
 
