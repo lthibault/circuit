@@ -61,29 +61,34 @@ func server(c *cli.Context) (err error) {
 		varDir = c.String("var")
 	}
 
-	app := suture.NewSimple("application")
+	// beacon
+	var beacon suture.Service
+	if c.String("beacon") != "" {
+		beacon, err = boot.BeaconConfig{}.NewService(c.String("beacon"))
+		if err != nil {
+			return errors.Wrapf(err, "error creating beacon (%s)", err)
+		}
+	}
 
 	// peer discovery
 	var trans *assemble.Transponder
 	if trans, err = assemble.NewTransponder(c.String("discover")); err != nil {
 		return errors.Wrapf(err, "error booting transponder (%s)", err)
 	}
-	app.Add(trans)
 
-	// runtime
-	cherr := make(chan error)
-	app.Add(boot.ServerConfig{
+	// circuit
+	cfg := boot.ServerConfig{
+		B:           beacon,
+		T:           trans,
+		Discover:    c.String("discover"),
 		ServiceName: tissue.ServiceName,
 		LocusName:   LocusName,
 		ServerAddr:  load(tcpaddr, varDir, readkey(c)),
 		JoinAddr:    join,
-		T:           trans,
-	}.NewService(cherr))
+	}
 
-	// run application
-	app.ServeBackground()
-	return <-cherr
-
+	boot.Circuit(cfg)
+	return nil
 }
 
 func parseAddr(c *cli.Context) (*net.TCPAddr, error) {

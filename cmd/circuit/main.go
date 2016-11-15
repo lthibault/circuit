@@ -34,6 +34,7 @@ func main() {
 				cli.StringFlag{Name: "hmac", Value: "", Usage: "File with HMAC credentials for HMAC/RC4 transport security.", EnvVar: "CIRCUIT_HMAC"},
 				cli.StringFlag{Name: "discover", Value: "udp://228.8.8.8:8822", Usage: "Multicast address for peer server discovery", EnvVar: "CIRCUIT_DISCOVER"},
 				cli.BoolFlag{Name: "docker", Usage: "Enable docker elements; docker command must be executable"},
+				cli.StringFlag{Name: "beacon", Value: "", Usage: "Start a cluster bootstrap beacon that listens on the provided interface", EnvVar: "CIRCUIT_BEACON"},
 			},
 		},
 		{

@@ -31,7 +31,6 @@ type bootdata struct {
 
 // Transponder {}
 type Transponder struct {
-	ChErr      chan error
 	chDiscover chan bootdata
 	ch         chan []byte
 	m          Multicaster
@@ -90,11 +89,7 @@ func (t *Transponder) Bootstrap(addr n.Addr, kin *tissue.Kin) {
 }
 
 // Stop serving discovery
-func (t Transponder) Stop() {
-	if err := t.m.Close(); err != nil {
-		log.Println(err)
-	}
-}
+func (t Transponder) Stop() {}
 
 // Addr returns the underlying Multicaster's address
 func (t Transponder) Addr() string {

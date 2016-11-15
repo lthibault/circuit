@@ -16,69 +16,46 @@ import (
 	"github.com/thejerf/suture"
 )
 
-// svcname string, locname string, join n.Addr, addr n.Addr, trans *assemble.Transponder
-
 // ServerConfig stores server configuration
 type ServerConfig struct {
+	Discover               string
 	ServiceName, LocusName string
 	ServerAddr, JoinAddr   n.Addr
-	T                      *assemble.Transponder
+
+	B suture.Service
+	T *assemble.Transponder
 }
 
-// NewService initializes a service from a config file
-func (cfg ServerConfig) NewService(cherr chan<- error) suture.Service {
-	return &server{
-		ChErr: cherr, // sub-implement
-		T:     cfg.T,
-
-		ServiceName: cfg.ServiceName,
-		LocusName:   cfg.LocusName,
-		JoinAddr:    cfg.JoinAddr,
-		ServerAddr:  cfg.ServerAddr,
-	}
-}
-
-// server service struct
-type server struct {
-	ChErr chan<- error
-	T     *assemble.Transponder
-
-	ServerAddr n.Addr
-	JoinAddr   n.Addr
-
-	// runtime
-	ServiceName string
-	LocusName   string
-	kill        chan os.Signal
-	err         chan<- error
-}
-
-// Serve circuitry
-func (s server) Serve() {
+// Circuit initializes a circuit server from a config file
+func Circuit(cfg ServerConfig) {
 	// tissue + locus
 	kin, xkin, rip := tissue.NewKin()
 	xlocus := locus.NewLocus(kin, rip)
 
 	// joining
 	switch {
-	case s.JoinAddr != nil:
-		kin.ReJoin(s.JoinAddr)
-	case s.T != nil:
-		go s.T.Bootstrap(s.ServerAddr, kin)
+	case cfg.JoinAddr != nil:
+		kin.ReJoin(cfg.JoinAddr)
+	case cfg.T != nil:
+		go cfg.T.Bootstrap(cfg.ServerAddr, kin)
 	default:
 		log.Println("Singleton server.")
 	}
 
-	circuit.Listen(s.ServiceName, xkin)
-	circuit.Listen(s.LocusName, xlocus)
+	circuit.Listen(cfg.ServiceName, xkin)
+	circuit.Listen(cfg.LocusName, xlocus)
+
+	services := suture.NewSimple("circuit-services")
+	if cfg.B != nil {
+		services.Add(cfg.B)
+	}
+	if cfg.T != nil {
+		services.Add(cfg.T)
+	}
+	services.ServeBackground()
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
-	s.Stop()
-}
-
-// Stop serving and shut-down the app
-func (s server) Stop() {
-	close(s.ChErr)
+	services.Stop()
 }
