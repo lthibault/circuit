@@ -76,7 +76,7 @@ func NewTransponder(addr string) (*Transponder, error) {
 // Serve discovery
 func (t *Transponder) Serve() {
 	d := <-t.chDiscover
-	log.Printf("Using UDP multicast discovery on address %s", t.Addr())
+	log.Printf("Discovering peers on multicast address %s", t.Addr())
 	NewAssembler(
 		d.addr,
 		t,
