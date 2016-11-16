@@ -1,6 +1,7 @@
 package boot
 
 import (
+	"log"
 	"net/url"
 
 	"github.com/go-mangos/mangos"
@@ -29,20 +30,22 @@ func (b BeaconConfig) NewService(addr string) (s suture.Service, err error) {
 
 // Serve ()
 func (b BeaconConfig) Serve() {
+	log.Printf("[ BEACON ] starting peer discovery service on address %s", b.addr)
+
 	var err error
 	if b.sock, err = star.NewSocket(); err != nil {
-		panic(errors.Wrap(err, "socket creation failed"))
+		log.Printf("[ BEACON ] socket creation failed (%s)", err)
 	}
 
 	b.sock.AddTransport(tcp.NewTransport())
 
 	if err = b.sock.Listen(b.addr); err != nil {
-		panic(errors.Wrap(err, "error binding beacon"))
+		log.Printf("[ BEACON ] socket bind error (%s)", err)
 	}
 
 	for {
 		if _, err = b.sock.Recv(); err != nil {
-			panic(errors.Wrap(err, "socket recv error"))
+			log.Printf("[ BEACON ] socket recv error (%s)", err)
 		}
 	}
 }
