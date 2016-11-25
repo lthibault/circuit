@@ -43,9 +43,12 @@ func (b BeaconConfig) Serve() {
 		log.Printf("[ BEACON ] socket bind error (%s)", err)
 	}
 
+	var msg []byte
 	for {
-		if _, err = b.sock.Recv(); err != nil {
+		if msg, err = b.sock.Recv(); err != nil {
 			log.Printf("[ BEACON ] socket recv error (%s)", err)
+		} else {
+			log.Printf("[ BEACON ] [ DEBUG ] %s", msg)
 		}
 	}
 }
