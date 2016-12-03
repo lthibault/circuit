@@ -11,8 +11,6 @@ import (
 	"github.com/go-mangos/mangos/protocol/star"
 	"github.com/go-mangos/mangos/transport/all"
 	"github.com/lthibault/circuit/kit/xor"
-	"github.com/lthibault/circuit/tissue"
-	"github.com/lthibault/circuit/use/n"
 	"github.com/pkg/errors"
 )
 
@@ -24,16 +22,10 @@ type Multicaster interface {
 	Close() error
 }
 
-type bootdata struct {
-	addr n.Addr
-	kin  *tissue.Kin
-}
-
 // Transponder {}
 type Transponder struct {
-	chDiscover chan bootdata
-	ch         chan []byte
-	m          Multicaster
+	ch chan []byte
+	m  Multicaster
 }
 
 // NewTransponder ()
@@ -65,31 +57,11 @@ func NewTransponder(addr string) (*Transponder, error) {
 			return nil, err
 		}
 	}
-	dsc := make(chan bootdata)
 	return &Transponder{
-		chDiscover: dsc,
-		ch:         make(chan []byte),
-		m:          m,
+		ch: make(chan []byte),
+		m:  m,
 	}, nil
 }
-
-// Serve discovery
-func (t *Transponder) Serve() {
-	d := <-t.chDiscover
-	log.Printf("Discovering peers on multicast address %s", t.Addr())
-	NewAssembler(
-		d.addr,
-		t,
-	).AssembleServer(func(joinAddr n.Addr) { d.kin.ReJoin(joinAddr) })
-}
-
-// Bootstrap the cluster on top of the transponder's discovery service
-func (t *Transponder) Bootstrap(addr n.Addr, kin *tissue.Kin) {
-	t.chDiscover <- bootdata{addr: addr, kin: kin}
-}
-
-// Stop serving discovery
-func (t Transponder) Stop() {}
 
 // Addr returns the underlying Multicaster's address
 func (t Transponder) Addr() string {
@@ -132,7 +104,8 @@ func (t Transponder) NewGather() *Gather {
 			}
 			var msg Msg
 			if err = json.Unmarshal(buf, &msg); err != nil {
-				continue // malformed invitation
+				log.Println("Malformed invitation:", err) // DEBUG
+				continue                                  // malformed invitation
 			}
 			chMsg <- &msg
 		}

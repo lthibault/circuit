@@ -13,15 +13,17 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
 	"path"
+	"syscall"
 
-	"github.com/lthibault/circuit/boot"
 	"github.com/lthibault/circuit/element/docker"
 	"github.com/lthibault/circuit/kit/assemble"
 	"github.com/lthibault/circuit/tissue"
+	"github.com/lthibault/circuit/tissue/locus"
+	"github.com/lthibault/circuit/use/circuit"
 	"github.com/lthibault/circuit/use/n"
 	"github.com/pkg/errors"
-	"github.com/thejerf/suture"
 
 	"github.com/urfave/cli"
 )
@@ -61,33 +63,38 @@ func server(c *cli.Context) (err error) {
 		varDir = c.String("var")
 	}
 
-	// beacon
-	var beacon suture.Service
-	if c.String("beacon") != "" {
-		beacon, err = boot.BeaconConfig{}.NewService(c.String("beacon"))
-		if err != nil {
-			return errors.Wrapf(err, "error creating beacon (%s)", err)
-		}
-	}
-
 	// peer discovery
 	var trans *assemble.Transponder
 	if trans, err = assemble.NewTransponder(c.String("discover")); err != nil {
 		return errors.Wrapf(err, "error booting transponder (%s)", err)
 	}
 
-	// circuit
-	cfg := boot.ServerConfig{
-		B:           beacon,
-		T:           trans,
-		Discover:    c.String("discover"),
-		ServiceName: tissue.ServiceName,
-		LocusName:   LocusName,
-		ServerAddr:  load(tcpaddr, varDir, readkey(c)),
-		JoinAddr:    join,
+	// start circuit runtime
+	addr := load(tcpaddr, varDir, readkey(c))
+
+	// tissue + locus
+	kin, xkin, rip := tissue.NewKin()
+	xlocus := locus.NewLocus(kin, rip)
+
+	// joining
+	switch {
+	case join != nil:
+		kin.ReJoin(join)
+	case trans != nil:
+		go assemble.NewAssembler(addr, trans).AssembleServer(func(joinAddr n.Addr) {
+			kin.ReJoin(joinAddr)
+		})
+	default:
+		log.Println("Singleton server.")
 	}
 
-	boot.Circuit(cfg)
+	circuit.Listen(tissue.ServiceName, xkin)
+	circuit.Listen(LocusName, xlocus)
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	<-sigs
+
 	return nil
 }
 

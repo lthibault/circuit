@@ -14,6 +14,8 @@ import (
 	"github.com/lthibault/circuit/kit/xor"
 )
 
+const scatterFrequency = 45 // default: 10
+
 // Msg {}
 type Msg struct {
 	Key     xor.Key
@@ -38,7 +40,7 @@ func (s *Scatter) Scatter() {
 	}
 
 	dur := time.Second
-	for i := 0; i < 10; i++ {
+	for i := 0; i < scatterFrequency; i++ {
 		s.scatter <- buf
 		time.Sleep(dur)
 		dur = (dur * 7) / 5
