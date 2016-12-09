@@ -18,12 +18,12 @@ import (
 // Assembler struct
 type Assembler struct {
 	focus     xor.Key
-	addr      n.Addr       // our circuit address
-	multicast *Transponder // discovery
+	addr      n.Addr     // our circuit address
+	multicast *Discovery // discovery
 }
 
 // NewAssembler ()
-func NewAssembler(addr n.Addr, multicast *Transponder) *Assembler {
+func NewAssembler(addr n.Addr, multicast *Discovery) *Assembler {
 	return &Assembler{
 		focus:     xor.ChooseKey(),
 		addr:      addr,
@@ -41,12 +41,7 @@ func (a *Assembler) scatter(origin string) {
 	a.multicast.NewScatter(a.focus, msg.Encode()).Scatter()
 }
 
-// JoinFunc ()
-type JoinFunc func(n.Addr)
-
-// AssembleServer ()
-func (a Assembler) AssembleServer(joinServer JoinFunc) {
-	go a.scatter("server")
+func (a *Assembler) gather(joinServer JoinFunc) {
 	gather := a.multicast.NewGather()
 	for {
 		_, payload := gather.Gather()
@@ -67,6 +62,15 @@ func (a Assembler) AssembleServer(joinServer JoinFunc) {
 			joinClient(a.addr, joinAddr)
 		}
 	}
+}
+
+// JoinFunc ()
+type JoinFunc func(n.Addr)
+
+// AssembleServer ()
+func (a Assembler) AssembleServer(joinServer JoinFunc) {
+	go a.scatter("server")
+	go a.gather(joinServer)
 }
 
 func joinClient(serverAddr, clientAddr n.Addr) {

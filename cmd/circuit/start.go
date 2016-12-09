@@ -64,9 +64,9 @@ func server(c *cli.Context) (err error) {
 	}
 
 	// peer discovery
-	var trans *assemble.Transponder
-	if trans, err = assemble.NewTransponder(c.String("discover")); err != nil {
-		return errors.Wrapf(err, "error booting transponder (%s)", err)
+	var disc *assemble.Discovery
+	if disc, err = assemble.NewDiscovery(c.String("discover")); err != nil {
+		return errors.Wrapf(err, "error booting Discovery (%s)", err)
 	}
 
 	// start circuit runtime
@@ -80,8 +80,8 @@ func server(c *cli.Context) (err error) {
 	switch {
 	case join != nil:
 		kin.ReJoin(join)
-	case trans != nil:
-		go assemble.NewAssembler(addr, trans).AssembleServer(func(joinAddr n.Addr) {
+	case disc != nil:
+		go assemble.NewAssembler(addr, disc).AssembleServer(func(joinAddr n.Addr) {
 			kin.ReJoin(joinAddr)
 		})
 	default:

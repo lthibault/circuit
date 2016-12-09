@@ -28,9 +28,9 @@ type GatherLens struct {
 }
 
 // NewGatherLens ()
-func NewGatherLens(t *Transponder, focus xor.Key, k int) *GatherLens {
+func NewGatherLens(d *Discovery, focus xor.Key, k int) *GatherLens {
 	return &GatherLens{
-		gather: t.NewGather(),
+		gather: d.NewGather(),
 		lens:   NewLens(focus, k),
 	}
 }

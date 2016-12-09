@@ -69,17 +69,17 @@ func Dial(addr string, authkey []byte) *Client {
 // DialDiscover dials into an existing circuit, using the discovery system to
 // locate peers.
 func DialDiscover(multicast string, authkey []byte) *Client {
-	var t *assemble.Transponder
+	var d *assemble.Discovery
 	var err error
-	if t, err = assemble.NewTransponder(multicast); err != nil {
-		panic(errors.Wrapf(err, "error building transponder (%v)", err))
+	if d, err = assemble.NewDiscovery(multicast); err != nil {
+		panic(errors.Wrapf(err, "error building Discovery (%v)", err))
 	}
 
 	_once.Do(func() {
 		_init(authkey)
 	})
 	c := &Client{}
-	dialback := assemble.NewAssembler(circuit.ServerAddr(), t).AssembleClient()
+	dialback := assemble.NewAssembler(circuit.ServerAddr(), d).AssembleClient()
 	c.y = locus.YLocus{X: circuit.Dial(dialback, "locus")}
 	return c
 }

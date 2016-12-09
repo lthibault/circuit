@@ -14,22 +14,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Multicaster {}
-type Multicaster interface {
+type multicaster interface {
 	Addr() string
 	Recv() ([]byte, error)
 	Send([]byte) error
 	Close() error
 }
 
-// Transponder {}
-type Transponder struct {
+// Discovery {}
+type Discovery struct {
 	ch chan []byte
-	m  Multicaster
+	m  multicaster
 }
 
-// NewTransponder ()
-func NewTransponder(addr string) (*Transponder, error) {
+// NewDiscovery ()
+func NewDiscovery(addr string) (*Discovery, error) {
 	var err error
 	var u *url.URL
 
@@ -40,7 +39,7 @@ func NewTransponder(addr string) (*Transponder, error) {
 		return nil, err
 	}
 
-	var m Multicaster
+	var m multicaster
 	switch u.Scheme {
 	case "udp":
 		addr, e := net.ResolveUDPAddr(u.Scheme, u.Host)
@@ -49,56 +48,56 @@ func NewTransponder(addr string) (*Transponder, error) {
 			return nil, err
 		}
 
-		if m, err = NewUDPMulticaster(addr); err != nil {
+		if m, err = newUDPMulticaster(addr); err != nil {
 			return nil, err
 		}
 	default:
-		if m, err = NewNNMulticaster(u); err != nil {
+		if m, err = newNNMulticaster(u); err != nil {
 			return nil, err
 		}
 	}
-	return &Transponder{
+	return &Discovery{
 		ch: make(chan []byte),
 		m:  m,
 	}, nil
 }
 
 // Addr returns the underlying Multicaster's address
-func (t Transponder) Addr() string {
-	return t.m.Addr()
+func (d Discovery) Addr() string {
+	return d.m.Addr()
 }
 
 // NewScatter ()
-func (t Transponder) NewScatter(key xor.Key, payload []byte) *Scatter {
+func (d Discovery) NewScatter(key xor.Key, payload []byte) *Scatter {
 	go func(buf <-chan []byte) {
-		if err := t.m.Send(<-buf); err != nil {
+		if err := d.m.Send(<-buf); err != nil {
 			log.Printf("multicast scatter error: " + err.Error())
 		}
-	}(t.ch)
+	}(d.ch)
 
 	return &Scatter{
-		scatter: t.ch,
+		scatter: d.ch,
 		key:     key,
 		payload: payload,
 	}
 }
 
 // NewGather ()
-func (t Transponder) NewGather() *Gather {
+func (d Discovery) NewGather() *Gather {
 	chMsg := make(chan *Msg)
 	g := &Gather{
-		gather:  t.ch,
+		gather:  d.ch,
 		recvMsg: chMsg,
 	}
 
 	runtime.SetFinalizer(g, func(g2 *Gather) {
-		_ = t.m.Close()
-		close(t.ch)
+		_ = d.m.Close()
+		close(d.ch)
 	})
 
 	go func(ch <-chan *Msg) {
 		for {
-			buf, err := t.m.Recv()
+			buf, err := d.m.Recv()
 			if err != nil {
 				panic(err)
 			}
@@ -120,8 +119,7 @@ type udp struct {
 	rconn *net.UDPConn
 }
 
-// NewUDPMulticaster ()
-func NewUDPMulticaster(addr *net.UDPAddr) (Multicaster, error) {
+func newUDPMulticaster(addr *net.UDPAddr) (multicaster, error) {
 	var (
 		wconn *net.UDPConn
 		rconn *net.UDPConn
@@ -169,7 +167,7 @@ type nnmsg struct {
 }
 
 // NewNNMulticaster ()
-func NewNNMulticaster(addr *url.URL) (Multicaster, error) {
+func newNNMulticaster(addr *url.URL) (multicaster, error) {
 	var sock mangos.Socket
 	var err error
 	if sock, err = star.NewSocket(); err != nil {
@@ -179,7 +177,7 @@ func NewNNMulticaster(addr *url.URL) (Multicaster, error) {
 	all.AddTransports(sock)
 
 	if err = sock.Dial(addr.String()); err != nil {
-		return nil, errors.New("transponder failed to establish connection")
+		return nil, errors.New("Discovery failed to establish connection")
 	}
 
 	return &nnmsg{addr: addr, sock: sock}, nil
