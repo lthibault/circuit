@@ -31,10 +31,11 @@ type Scatter struct {
 
 // Scatter ()
 func (s *Scatter) Scatter() {
+	defer close(s.scatter)
 	var err error
 	var buf []byte
 
-	msg := &Msg{Key: s.key, Payload: s.payload}
+	msg := Msg{Key: s.key, Payload: s.payload}
 	if buf, err = json.Marshal(msg); err != nil {
 		panic(err)
 	}

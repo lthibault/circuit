@@ -69,9 +69,11 @@ func (d Discovery) Addr() string {
 
 // NewScatter ()
 func (d Discovery) NewScatter(key xor.Key, payload []byte) *Scatter {
-	go func(buf <-chan []byte) {
-		if err := d.m.Send(<-buf); err != nil {
-			log.Printf("multicast scatter error: " + err.Error())
+	go func(chDiscMsg <-chan []byte) {
+		for buf := range chDiscMsg {
+			if err := d.m.Send(buf); err != nil {
+				log.Printf("multicast scatter error: " + err.Error())
+			}
 		}
 	}(d.ch)
 
