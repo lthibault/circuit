@@ -81,7 +81,7 @@ func server(c *cli.Context) (err error) {
 	case join != nil:
 		kin.ReJoin(join)
 	case disc != nil:
-		go assemble.NewAssembler(addr, disc).AssembleServer(func(joinAddr n.Addr) {
+		assemble.NewAssembler(addr, disc).AssembleServer(func(joinAddr n.Addr) {
 			kin.ReJoin(joinAddr)
 		})
 	default:
