@@ -1,4 +1,6 @@
-all: clean
+all: clean bin
+
+bin:
 	go build -o $(GOPATH)/bin/circuit cmd/circuit/main.go cmd/circuit/server.go cmd/circuit/hmac.go \
 		cmd/circuit/chan.go cmd/circuit/dns.go cmd/circuit/joinleave.go \
 		cmd/circuit/ls.go cmd/circuit/wait.go cmd/circuit/util.go \
