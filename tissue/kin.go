@@ -61,13 +61,13 @@ func (k *Kin) ReJoin(join n.Addr) (err error) {
 	}()
 	ykin := YKin{
 		KinAvatar{
-			X: circuit.Dial(join, ServiceName),
+			X: circuit.Dial(join, ServiceName), // X is a circuit.PermX
 		},
 	}
 	for _, peer := range ykin.Join(k.chooseBoundary(Spread), Spread) {
 		k.remember(peer)
 	}
-	return nil
+	return
 }
 
 // chooseBoundary samples spread-many random nodes from the circuit network

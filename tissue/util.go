@@ -31,12 +31,14 @@ const (
 	Depth = 3 * 2 // Lazy random walk with stay-put probability one half
 )
 
-// Avatar is a pair of a permanent cross-interface and an ID, identifying its underlying receiver uniquely.
+// Avatar is a pair of a permanent cross-interface and an ID, identifying its
+// underlying receiver uniquely.
 type Avatar struct {
 	X  circuit.PermX
 	ID lang.ReceiverID
 }
 
+// Equals tests if the ID values are equal
 func (av Avatar) Equals(w Avatar) bool {
 	if av.ID == 0 {
 		panic(0)
