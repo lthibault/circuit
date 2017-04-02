@@ -16,6 +16,7 @@ import (
 // FolkAvatar is an Avatar underlied by a user receiver for a service shared over the tissue system.
 type FolkAvatar Avatar
 
+// Avatar ...
 func (av FolkAvatar) Avatar() Avatar {
 	return Avatar(av)
 }
@@ -47,7 +48,7 @@ func (x XKin) Attach(topic string) FolkAvatar {
 func (x XKin) Join(boundary []KinAvatar, spread int) []KinAvatar {
 	offer := x.k.chooseBoundary(spread) // compute boundary before merge happens
 	for _, q := range boundary {
-		q = x.k.remember(q)
+		x.k.remember(q)
 	}
 	return offer
 }
@@ -71,21 +72,24 @@ func (x XKin) Walk(t int) KinAvatar {
 	return YKin{hop}.Walk(t - 1)
 }
 
-// YKin
+// YKin ...
 type YKin struct {
 	av KinAvatar
 }
 
+// Join ...
 func (y YKin) Join(boundary []KinAvatar, n int) []KinAvatar {
 	// Do not recover
 	return y.av.X.Call("Join", boundary, n)[0].([]KinAvatar)
 }
 
+// Walk ...
 func (y YKin) Walk(t int) KinAvatar {
 	// Do not recover; XKin.Walk relies on panics
 	return y.av.X.Call("Walk", t)[0].(KinAvatar)
 }
 
+// Attach ...
 func (y YKin) Attach(topic string) FolkAvatar {
 	defer func() {
 		recover()
