@@ -19,6 +19,11 @@ import (
 )
 
 // Kin is a service that maintains connectivity to a small set of 'neighbor' circuits.
+//
+// It reports peers that are discovered to be dead to the users.
+// Kin hooks FolkAvatars with a trigger that catches Call panics
+// Use lazy random walk (for sampling nodes) to avoid parity issues.
+// On Join reciprocate directly by adding the caller as a kin.
 type Kin struct {
 	kinav        KinAvatar // Permanent cluster-wide unique ID for this kin
 	neighborhood *Neighborhood
@@ -28,8 +33,10 @@ type Kin struct {
 	folk  []*Folk
 }
 
+// ServiceName (what's a service???)
 const ServiceName = "kin"
 
+// NewKin creates a new Kin service, which monitors a RIP channel for deceased peers
 func NewKin() (k *Kin, xkin XKin, rip <-chan KinAvatar) {
 	k = &Kin{
 		neighborhood: NewNeighborhood(),
@@ -58,7 +65,7 @@ func (k *Kin) ReJoin(join n.Addr) (err error) {
 		},
 	}
 	for _, peer := range ykin.Join(k.chooseBoundary(Spread), Spread) {
-		peer = k.remember(peer)
+		k.remember(peer)
 	}
 	return nil
 }
@@ -143,6 +150,7 @@ func (k *Kin) forget(key lang.ReceiverID) {
 	k.expand()
 }
 
+// Avatar returns a KinAvatar for the Kin instance
 func (k *Kin) Avatar() KinAvatar {
 	return k.kinav
 }
@@ -170,13 +178,14 @@ func (k *Kin) users() []*Folk {
 	return folk
 }
 
+// Attach a FolkAvatar to a PUBSUB topic
 func (k *Kin) Attach(topic string, folkAvatar FolkAvatar) *Folk {
 	var neighbors = k.neighborhood.View()
 	peers := make([]FolkAvatar, 0, len(neighbors))
 	for _, av := range neighbors {
 		kinAvatar := KinAvatar(av)
-		if folkAvatar := (YKin{kinAvatar}).Attach(topic); folkAvatar.X != nil {
-			peers = append(peers, folkAvatar)
+		if folkAv := (YKin{kinAvatar}).Attach(topic); folkAv.X != nil {
+			peers = append(peers, folkAv)
 		}
 	}
 	k.Lock()
