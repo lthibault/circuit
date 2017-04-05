@@ -73,6 +73,10 @@ func (*Runtime) Ref(v interface{}) circuit.X {
 	return Ref(v)
 }
 
+// Ref returns a cross-reference for a Go object.
+// If Z is any go object that has public methods (call it an interface object),
+// you can convert it into a "cross-interface" (which is an encodable handle
+// for the underlying live Go object).
 func Ref(v interface{}) circuit.X {
 	if v == nil {
 		return nil

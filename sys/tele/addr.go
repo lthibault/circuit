@@ -31,6 +31,7 @@ func init() {
 	gob.Register(&Addr{})
 }
 
+// MustParseNetAddr panics if the netaddr can't be parsed
 func MustParseNetAddr(s string) net.Addr {
 	addr, err := ParseNetAddr(s)
 	if err != nil {
@@ -39,14 +40,17 @@ func MustParseNetAddr(s string) net.Addr {
 	return addr
 }
 
+// ParseNetAddr parses a network address
 func ParseNetAddr(s string) (net.Addr, error) {
 	return net.ResolveTCPAddr("tcp", s)
 }
 
+// NewNetAddr creates a new network address
 func NewNetAddr(id n.WorkerID, pid int, addr net.Addr) *Addr {
 	return &Addr{ID: id, PID: pid, TCP: addr.(*net.TCPAddr)}
 }
 
+// NewAddr creates a new circuit address
 func NewAddr(id n.WorkerID, pid int, hostport string) (n.Addr, error) {
 	a, err := net.ResolveTCPAddr("tcp", hostport)
 	if err != nil {
@@ -55,14 +59,18 @@ func NewAddr(id n.WorkerID, pid int, hostport string) (n.Addr, error) {
 	return &Addr{ID: id, PID: pid, TCP: a}, nil
 }
 
+// NetAddr reports the network address for the circuit
 func (a *Addr) NetAddr() net.Addr {
 	return a.TCP
 }
 
+// WorkerID reports the circuit's WorkerID
 func (a *Addr) WorkerID() n.WorkerID {
 	return a.ID
 }
 
+// String satisfies the fmt.Stringer interface and reports a human-readable
+// circuit address string.
 func (a *Addr) String() string {
 	u := url.URL{
 		Scheme: n.Scheme,
@@ -72,10 +80,12 @@ func (a *Addr) String() string {
 	return u.String()
 }
 
+// FileName stringifies the worker ID
 func (a *Addr) FileName() string {
 	return a.ID.String()
 }
 
+// ParseAddr produces something similar to:
 // circuit://123.3.45.0:3456/2345/R1122334455667788
 func ParseAddr(s string) (*Addr, error) {
 	u, err := url.Parse(s)
