@@ -27,7 +27,7 @@ func (x XLocus) Self() interface{} {
 	return x.l.Self()
 }
 
-// YLocus…
+// YLocus …
 type YLocus struct {
 	X circuit.PermX
 }

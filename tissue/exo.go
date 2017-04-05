@@ -13,7 +13,8 @@ import (
 	"math/rand"
 )
 
-// FolkAvatar is an Avatar underlied by a user receiver for a service shared over the tissue system.
+// FolkAvatar is an Avatar underlied by a user receiver for a service shared
+// over the tissue system.
 type FolkAvatar Avatar
 
 // Avatar ...
@@ -53,8 +54,8 @@ func (x XKin) Join(boundary []KinAvatar, spread int) []KinAvatar {
 	return offer
 }
 
-// Walk performs a random walk through the expander-graph network of circuit workers
-// of length t steps and returns the terminal node.
+// Walk performs a random walk through the expander-graph network of circuit
+// workers of length t steps and returns the terminal node.
 func (x XKin) Walk(t int) KinAvatar {
 	if t <= 0 {
 		return x.k.Avatar()
