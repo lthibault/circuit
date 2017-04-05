@@ -16,13 +16,13 @@ import (
 // Neighborhood is a set of perm cross-interfaces.
 type Neighborhood struct {
 	sync.Mutex
-	open map[interface{}]Avatar
+	open map[lang.ReceiverID]Avatar
 }
 
 // NewNeighborhood creates a new rotor.
 func NewNeighborhood() *Neighborhood {
 	return &Neighborhood{
-		open: make(map[interface{}]Avatar),
+		open: make(map[lang.ReceiverID]Avatar),
 	}
 }
 
