@@ -11,6 +11,7 @@ import (
 	"io"
 )
 
+// Container represents a Docker container
 type Container interface {
 	Scrub()
 	IsDone() bool
